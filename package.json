@@ -1,0 +1,14 @@
+{
+  "name": "exams-root",
+  "version": "1.0.0",
+  "description": "Exam Notifier & Result Management System",
+  "scripts": {
+    "backend": "npm run dev --prefix backend",
+    "frontend": "npm run dev --prefix frontend -- --host",
+    "dev": "npx concurrently \"npm run backend\" \"npm run frontend\"",
+    "seed": "cd backend && node seeds/seed.js"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

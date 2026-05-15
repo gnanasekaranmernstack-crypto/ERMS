@@ -12,6 +12,7 @@ import authRoutes from './routes/authRoutes.js';
 import examRoutes from './routes/examRoutes.js';
 import resultRoutes from './routes/resultRoutes.js';
 import dashboardRoutes from './routes/dashboardRoutes.js';
+import bookRoutes from './routes/bookRoutes.js';
 
 dotenv.config();
 
@@ -35,6 +36,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/exams', examRoutes);
 app.use('/api/results', resultRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/books', bookRoutes);
 
 if (process.env.NODE_ENV === 'production') {
   // Serve static files from the frontend/dist directory

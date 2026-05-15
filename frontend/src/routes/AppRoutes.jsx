@@ -10,6 +10,7 @@ const Exams = lazy(() => import('../pages/Exams'));
 const Results = lazy(() => import('../pages/Results'));
 const Profile = lazy(() => import('../pages/Profile'));
 const Timetable = lazy(() => import('../pages/Timetable'));
+const Books = lazy(() => import('../pages/Books'));
 
 const LoadingSpinner = () => (
   <div className="min-h-[60vh] flex items-center justify-center">
@@ -52,6 +53,7 @@ const AppRoutes = () => {
           <Route path="results/semester" element={<Results type="Semester" />} />
           <Route path="results/arrear" element={<Results type="Arrear" />} />
           
+          <Route path="books" element={<Books />} />
           <Route path="profile" element={<Profile />} />
         </Route>
 

@@ -9,7 +9,8 @@ import {
   HiOutlineMenu,
   HiOutlineUserCircle,
   HiChevronDown,
-  HiChevronRight
+  HiChevronRight,
+  HiOutlineBookOpen
 } from 'react-icons/hi';
 import { MdCopyright } from 'react-icons/md';
 import { useAuth } from '../../context/AuthContext';
@@ -62,6 +63,7 @@ const Sidebar = ({ isOpen, toggleSidebar, isCollapsed, toggleCollapse }) => {
         { name: 'Arrear Result', path: '/results/arrear' },
       ]
     },
+    { name: 'Books Library', path: '/books', icon: HiOutlineBookOpen },
     { name: 'Profile', path: '/profile', icon: HiOutlineUserCircle },
   ];
 

@@ -1,6 +1,9 @@
 import asyncHandler from 'express-async-handler';
 import User from '../models/User.js';
 import generateToken from '../utils/generateToken.js';
+import Subject from '../models/Subject.js';
+import Exam from '../models/Exam.js';
+import Result from '../models/Result.js';
 
 // @desc    Auth user & get token
 const authUser = asyncHandler(async (req, res) => {
@@ -71,12 +74,15 @@ const updateUserProfile = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
 
   if (user) {
+    const oldDepartment = user.department;
+    const newDepartment = req.body.department || user.department;
+
     user.name = req.body.name || user.name;
     user.entryType = req.body.entryType || user.entryType;
     user.degreeBranch = req.body.degreeBranch || user.degreeBranch;
     user.university = req.body.university || user.university;
     user.regulation = req.body.regulation || user.regulation;
-    user.department = req.body.department || user.department;
+    user.department = newDepartment;
     user.startYear = req.body.startYear || user.startYear;
     user.endYear = req.body.endYear || user.endYear;
     user.collegeName = req.body.collegeName || user.collegeName;
@@ -91,6 +97,16 @@ const updateUserProfile = asyncHandler(async (req, res) => {
     }
 
     const updatedUser = await user.save();
+
+    // Synchronization logic: Update all related records if department changed
+    if (oldDepartment !== newDepartment) {
+      console.log(`Syncing department change: ${oldDepartment} -> ${newDepartment}`);
+      await Promise.all([
+        Subject.updateMany({ createdBy: user._id }, { department: newDepartment }),
+        Exam.updateMany({ user: user._id }, { department: newDepartment }),
+        Result.updateMany({ user: user._id }, { department: newDepartment })
+      ]);
+    }
 
     res.json({
       _id: updatedUser._id,

@@ -11,6 +11,8 @@ const Results = lazy(() => import('../pages/Results'));
 const Profile = lazy(() => import('../pages/Profile'));
 const Timetable = lazy(() => import('../pages/Timetable'));
 const Books = lazy(() => import('../pages/Books'));
+const QuestionBank = lazy(() => import('../pages/QuestionBank'));
+const Semesters = lazy(() => import('../pages/Semesters'));
 
 const LoadingSpinner = () => (
   <div className="min-h-[60vh] flex items-center justify-center">
@@ -44,6 +46,7 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }>
           <Route index element={<Dashboard />} />
+          <Route path="semesters" element={<Semesters />} />
           <Route path="exams" element={<Exams />} />
           <Route path="exams/timetable" element={<Timetable />} />
           <Route path="exams/semester" element={<Exams type="Semester" />} />
@@ -54,6 +57,7 @@ const AppRoutes = () => {
           <Route path="results/arrear" element={<Results type="Arrear" />} />
           
           <Route path="books" element={<Books />} />
+          <Route path="question-bank" element={<QuestionBank />} />
           <Route path="profile" element={<Profile />} />
         </Route>
 

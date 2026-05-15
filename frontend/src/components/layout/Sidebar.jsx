@@ -10,7 +10,9 @@ import {
   HiOutlineUserCircle,
   HiChevronDown,
   HiChevronRight,
-  HiOutlineBookOpen
+  HiOutlineBookOpen,
+  HiOutlineQuestionMarkCircle,
+  HiOutlineCollection
 } from 'react-icons/hi';
 import { MdCopyright } from 'react-icons/md';
 import { useAuth } from '../../context/AuthContext';
@@ -46,6 +48,7 @@ const Sidebar = ({ isOpen, toggleSidebar, isCollapsed, toggleCollapse }) => {
 
   const menuItems = [
     { name: 'Dashboard', path: '/', icon: HiOutlineViewGrid },
+    { name: 'Semesters', path: '/semesters', icon: HiOutlineCollection },
     { 
       name: 'Exams', 
       icon: HiOutlineClipboardList,
@@ -64,6 +67,7 @@ const Sidebar = ({ isOpen, toggleSidebar, isCollapsed, toggleCollapse }) => {
       ]
     },
     { name: 'Books Library', path: '/books', icon: HiOutlineBookOpen },
+    { name: 'Question Bank Guide', path: '/question-bank', icon: HiOutlineQuestionMarkCircle },
     { name: 'Profile', path: '/profile', icon: HiOutlineUserCircle },
   ];
 
@@ -198,18 +202,6 @@ const Sidebar = ({ isOpen, toggleSidebar, isCollapsed, toggleCollapse }) => {
         </nav>
 
         <div className="p-4 border-t border-white/10 space-y-4">
-          {!isCollapsed && (
-            <div className="flex items-center gap-3 px-2">
-              <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white font-bold border border-white/20">
-                {user?.name?.charAt(0)}
-              </div>
-              <div className="overflow-hidden">
-                <p className="text-white text-sm font-bold truncate">{user?.name}</p>
-                <p className="text-indigo-200 text-[10px] truncate">{user?.department}</p>
-              </div>
-            </div>
-          )}
-          
           <button 
             onClick={handleLogout}
             className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl text-indigo-200 hover:bg-white/10 hover:text-white transition-all duration-300 font-medium

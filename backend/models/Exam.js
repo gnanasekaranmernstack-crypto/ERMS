@@ -2,6 +2,11 @@ import mongoose from 'mongoose';
 
 const examSchema = mongoose.Schema(
   {
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: 'User',
+    },
     subjectName: {
       type: String,
       required: true,

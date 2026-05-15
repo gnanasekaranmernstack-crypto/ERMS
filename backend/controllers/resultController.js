@@ -19,9 +19,10 @@ const getResults = asyncHandler(async (req, res) => {
   const department = req.query.department ? { department: req.query.department } : {};
   const semester = req.query.semester ? { semester: req.query.semester } : {};
   const category = req.query.category ? { category: req.query.category } : {};
-
-  const count = await Result.countDocuments({ ...keyword, ...department, ...semester, ...category });
-  const results = await Result.find({ ...keyword, ...department, ...semester, ...category })
+  const userFilter = { user: req.user._id };
+  
+  const count = await Result.countDocuments({ ...keyword, ...department, ...semester, ...category, ...userFilter });
+  const results = await Result.find({ ...keyword, ...department, ...semester, ...category, ...userFilter })
     .limit(pageSize)
     .skip(pageSize * (page - 1))
     .sort({ createdAt: -1 })
@@ -62,6 +63,7 @@ const createResult = asyncHandler(async (req, res) => {
   } = req.body;
 
   const result = new Result({
+    user: req.user._id,
     studentName,
     registerNumber,
     department,

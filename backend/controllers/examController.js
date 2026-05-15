@@ -17,9 +17,11 @@ const getExams = asyncHandler(async (req, res) => {
   const department = req.query.department ? { department: req.query.department } : {};
   const semester = req.query.semester ? { semester: req.query.semester } : {};
   const category = req.query.category ? { category: req.query.category } : {};
+  const status = req.query.status ? { status: req.query.status } : {};
+  const userFilter = { user: req.user._id };
 
-  const count = await Exam.countDocuments({ ...keyword, ...department, ...semester, ...category });
-  const exams = await Exam.find({ ...keyword, ...department, ...semester, ...category })
+  const count = await Exam.countDocuments({ ...keyword, ...department, ...semester, ...category, ...status, ...userFilter });
+  const exams = await Exam.find({ ...keyword, ...department, ...semester, ...category, ...status, ...userFilter })
     .limit(pageSize)
     .skip(pageSize * (page - 1))
     .sort({ examDate: 1 })
@@ -55,6 +57,7 @@ const createExam = asyncHandler(async (req, res) => {
   } = req.body;
 
   const exam = new Exam({
+    user: req.user._id,
     subjectName,
     subjectCode,
     department,

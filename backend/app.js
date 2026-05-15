@@ -13,6 +13,8 @@ import examRoutes from './routes/examRoutes.js';
 import resultRoutes from './routes/resultRoutes.js';
 import dashboardRoutes from './routes/dashboardRoutes.js';
 import bookRoutes from './routes/bookRoutes.js';
+import questionBankRoutes from './routes/questionBankRoutes.js';
+import subjectRoutes from './routes/subjectRoutes.js';
 
 dotenv.config();
 
@@ -40,6 +42,8 @@ app.use('/api/exams', examRoutes);
 app.use('/api/results', resultRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/books', bookRoutes);
+app.use('/api/question-banks', questionBankRoutes);
+app.use('/api/subjects', subjectRoutes);
 
 app.use('/uploads', express.static(uploadsPath));
 

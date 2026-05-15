@@ -6,43 +6,31 @@ import Result from '../models/Result.js';
 // @route   GET /api/dashboard/stats
 // @access  Private
 const getDashboardStats = asyncHandler(async (req, res) => {
-  const totalExams = await Exam.countDocuments();
-  const upcomingExamsCount = await Exam.countDocuments({ status: 'Upcoming' });
-  const completedExamsCount = await Exam.countDocuments({ status: 'Completed' });
-  const latestResultCount = await Result.countDocuments();
-
-  // Upcoming exams for list
-  const upcomingExams = await Exam.find({ status: 'Upcoming' })
-    .sort({ examDate: 1 })
-    .limit(5);
-
-  // Charts data
-  // 1. Exams per month
-  const examsPerMonth = await Exam.aggregate([
-    {
-      $group: {
-        _id: { $month: '$examDate' },
-        count: { $sum: 1 },
-      },
-    },
-    { $sort: { _id: 1 } },
+  const [
+    totalExams,
+    upcomingExamsCount,
+    completedExamsCount,
+    latestResultCount,
+    upcomingExams,
+    examsPerMonth,
+    departmentExams
+  ] = await Promise.all([
+    Exam.countDocuments(),
+    Exam.countDocuments({ status: 'Upcoming' }),
+    Exam.countDocuments({ status: 'Completed' }),
+    Result.countDocuments(),
+    Exam.find({ status: 'Upcoming' }).sort({ examDate: 1 }).limit(5).lean(),
+    Exam.aggregate([
+      { $group: { _id: { $month: '$examDate' }, count: { $sum: 1 } } },
+      { $sort: { _id: 1 } },
+    ]),
+    Exam.aggregate([
+      { $group: { _id: '$department', count: { $sum: 1 } } },
+    ])
   ]);
 
-  // 2. Department-wise exams
-  const departmentExams = await Exam.aggregate([
-    {
-      $group: {
-        _id: '$department',
-        count: { $sum: 1 },
-      },
-    },
-  ]);
-
-  // 3. Upcoming exams trend (by date)
-  const upcomingTrend = await Exam.find({ status: 'Upcoming' })
-    .sort({ examDate: 1 })
-    .limit(10)
-    .select('examDate subjectName');
+  // 3. Upcoming exams trend (by date) - run this too or use the upcomingExams result
+  const upcomingTrend = upcomingExams; // Re-use for simple trend to save a query
 
   res.json({
     stats: {

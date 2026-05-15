@@ -60,6 +60,14 @@ const examSchema = mongoose.Schema(
   }
 );
 
+// Add indexes for faster querying
+examSchema.index({ department: 1 });
+examSchema.index({ semester: 1 });
+examSchema.index({ category: 1 });
+examSchema.index({ status: 1 });
+examSchema.index({ examDate: 1 });
+examSchema.index({ subjectName: 'text', subjectCode: 'text' });
+
 // Pre-save hook to automatically mark exam as completed if date is passed
 examSchema.pre('save', function () {
   const now = new Date();

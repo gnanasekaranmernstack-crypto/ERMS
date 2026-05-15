@@ -24,7 +24,8 @@ const getResults = asyncHandler(async (req, res) => {
   const results = await Result.find({ ...keyword, ...department, ...semester, ...category })
     .limit(pageSize)
     .skip(pageSize * (page - 1))
-    .sort({ createdAt: -1 });
+    .sort({ createdAt: -1 })
+    .lean();
 
   res.json({ results, page, pages: Math.ceil(count / pageSize), total: count });
 });

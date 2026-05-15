@@ -49,6 +49,13 @@ const resultSchema = mongoose.Schema(
   }
 );
 
+// Add indexes for faster querying
+resultSchema.index({ registerNumber: 1 });
+resultSchema.index({ department: 1 });
+resultSchema.index({ semester: 1 });
+resultSchema.index({ category: 1 });
+resultSchema.index({ studentName: 'text', subjectName: 'text', subjectCode: 'text' });
+
 const Result = mongoose.model('Result', resultSchema);
 
 export default Result;

@@ -22,7 +22,8 @@ const getExams = asyncHandler(async (req, res) => {
   const exams = await Exam.find({ ...keyword, ...department, ...semester, ...category })
     .limit(pageSize)
     .skip(pageSize * (page - 1))
-    .sort({ examDate: 1 });
+    .sort({ examDate: 1 })
+    .lean();
 
   res.json({ exams, page, pages: Math.ceil(count / pageSize), total: count });
 });

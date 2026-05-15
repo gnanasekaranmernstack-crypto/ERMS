@@ -25,10 +25,14 @@ app.use(cors());
 app.use(compression());
 app.use(express.json());
 
-const __dirname = path.resolve();
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const rootDir = path.join(__dirname, '..');
 
 if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '/frontend/dist')));
+  app.use(express.static(path.join(rootDir, '/frontend/dist')));
 } else {
   app.get('/', (req, res) => {
     res.send('API is running...');
@@ -42,7 +46,7 @@ app.use('/api/dashboard', dashboardRoutes);
 
 if (process.env.NODE_ENV === 'production') {
   app.get('*', (req, res) =>
-    res.sendFile(path.resolve(__dirname, 'frontend', 'dist', 'index.html'))
+    res.sendFile(path.resolve(rootDir, 'frontend', 'dist', 'index.html'))
   );
 }
 

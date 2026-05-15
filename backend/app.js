@@ -41,7 +41,7 @@ if (process.env.NODE_ENV === 'production') {
   app.use(express.static(distPath));
 
   // Catch-all route to serve index.html for all non-API routes (SPA support)
-  app.get('*', (req, res) => {
+  app.get('(.*)', (req, res) => {
     res.sendFile(path.resolve(distPath, 'index.html'));
   });
 } else {

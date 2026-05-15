@@ -1,4 +1,5 @@
 import express from 'express';
+import { fileURLToPath } from 'url';
 import path from 'path';
 import dotenv from 'dotenv';
 import cors from 'cors';
@@ -25,19 +26,10 @@ app.use(cors());
 app.use(compression());
 app.use(express.json());
 
-import { fileURLToPath } from 'url';
-
+// Use path.resolve for more reliable path calculation
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const rootDir = path.join(__dirname, '..');
-
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(rootDir, '/frontend/dist')));
-} else {
-  app.get('/', (req, res) => {
-    res.send('API is running...');
-  });
-}
+const distPath = path.resolve(__dirname, '../frontend/dist');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/exams', examRoutes);
@@ -45,9 +37,17 @@ app.use('/api/results', resultRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 
 if (process.env.NODE_ENV === 'production') {
-  app.get(/.*/, (req, res) =>
-    res.sendFile(path.resolve(rootDir, 'frontend', 'dist', 'index.html'))
-  );
+  // Serve static files from the frontend/dist directory
+  app.use(express.static(distPath));
+
+  // Catch-all route to serve index.html for all non-API routes (SPA support)
+  app.get('*', (req, res) => {
+    res.sendFile(path.resolve(distPath, 'index.html'));
+  });
+} else {
+  app.get('/', (req, res) => {
+    res.send('API is running...');
+  });
 }
 
 app.use(notFound);

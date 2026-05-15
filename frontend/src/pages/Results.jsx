@@ -18,7 +18,7 @@ const Results = ({ type }) => {
   const [results, setResults] = useState([]);
   const [pendingExams, setPendingExams] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [pagination, setPagination] = useState({ page: 1, pages: 1 });
+  const [pagination, setPagination] = useState({ page: 1, pages: 1, pageSize: 10 });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingResult, setEditingResult] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -38,6 +38,7 @@ const Results = ({ type }) => {
     marks: '',
     grade: '',
     resultStatus: 'Pass',
+    category: type || 'Semester',
   });
 
   useEffect(() => {
@@ -47,18 +48,19 @@ const Results = ({ type }) => {
         department: user.department || '',
         registerNumber: user.registerNumber || '',
         studentName: user.name || '',
-        semester: availableSemesters[0].toString()
+        semester: availableSemesters[0].toString(),
+        category: type || 'Semester'
       }));
     }
-  }, [user, editingResult]);
+  }, [user, editingResult, type]);
 
-  const fetchResultsData = async (page = 1) => {
+  const fetchResultsData = async (page = 1, pageSize = pagination.pageSize) => {
     setLoading(true);
     try {
       // Fetch actual results
-      const { data } = await API.get(`/results?pageNumber=${page}&keyword=${searchTerm}&department=${filterDept}`);
+      const { data } = await API.get(`/results?pageNumber=${page}&pageSize=${pageSize}&keyword=${searchTerm}&department=${filterDept}&category=${type || 'Semester'}`);
       setResults(data.results);
-      setPagination({ page: data.page, pages: data.pages });
+      setPagination({ page: data.page, pages: data.pages, pageSize: pageSize });
 
       // Fetch completed exams to check for "Waiting Results"
       const { data: examsData } = await API.get(`/exams?pageSize=100&category=${type || 'Semester'}`);
@@ -101,6 +103,7 @@ const Results = ({ type }) => {
         marks: '',
         grade: '',
         resultStatus: 'Pass',
+        category: type || 'Semester',
       });
     } else if (item) {
       setEditingResult(item);
@@ -117,6 +120,7 @@ const Results = ({ type }) => {
         marks: '',
         grade: '',
         resultStatus: 'Pass',
+        category: type || 'Semester',
       });
     }
     setIsModalOpen(true);
@@ -299,7 +303,7 @@ const Results = ({ type }) => {
         data={results} 
         loading={loading}
         pagination={pagination}
-        onPageChange={(page) => fetchResultsData(page)}
+        onPageChange={(page, pageSize) => fetchResultsData(page, pageSize)}
       />
 
       <Modal 

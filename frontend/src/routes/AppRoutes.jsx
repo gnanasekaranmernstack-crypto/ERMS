@@ -1,13 +1,21 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Layout from '../components/layout/Layout';
-import Login from '../pages/Login';
-import Dashboard from '../pages/Dashboard';
-import Exams from '../pages/Exams';
-import Results from '../pages/Results';
-import Profile from '../pages/Profile';
-import Timetable from '../pages/Timetable';
+
+// Lazy load pages
+const Login = lazy(() => import('../pages/Login'));
+const Dashboard = lazy(() => import('../pages/Dashboard'));
+const Exams = lazy(() => import('../pages/Exams'));
+const Results = lazy(() => import('../pages/Results'));
+const Profile = lazy(() => import('../pages/Profile'));
+const Timetable = lazy(() => import('../pages/Timetable'));
+
+const LoadingSpinner = () => (
+  <div className="min-h-[60vh] flex items-center justify-center">
+    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+  </div>
+);
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -25,29 +33,31 @@ const ProtectedRoute = ({ children }) => {
 
 const AppRoutes = () => {
   return (
-    <Routes>
-      <Route path="/login" element={<Login />} />
-      
-      <Route path="/" element={
-        <ProtectedRoute>
-          <Layout />
-        </ProtectedRoute>
-      }>
-        <Route index element={<Dashboard />} />
-        <Route path="exams" element={<Exams />} />
-        <Route path="exams/timetable" element={<Timetable />} />
-        <Route path="exams/semester" element={<Exams type="Semester" />} />
-        <Route path="exams/arrear" element={<Exams type="Arrear" />} />
+    <Suspense fallback={<LoadingSpinner />}>
+      <Routes>
+        <Route path="/login" element={<Login />} />
         
-        <Route path="results" element={<Results />} />
-        <Route path="results/semester" element={<Results type="Semester" />} />
-        <Route path="results/arrear" element={<Results type="Arrear" />} />
-        
-        <Route path="profile" element={<Profile />} />
-      </Route>
+        <Route path="/" element={
+          <ProtectedRoute>
+            <Layout />
+          </ProtectedRoute>
+        }>
+          <Route index element={<Dashboard />} />
+          <Route path="exams" element={<Exams />} />
+          <Route path="exams/timetable" element={<Timetable />} />
+          <Route path="exams/semester" element={<Exams type="Semester" />} />
+          <Route path="exams/arrear" element={<Exams type="Arrear" />} />
+          
+          <Route path="results" element={<Results />} />
+          <Route path="results/semester" element={<Results type="Semester" />} />
+          <Route path="results/arrear" element={<Results type="Arrear" />} />
+          
+          <Route path="profile" element={<Profile />} />
+        </Route>
 
-      <Route path="*" element={<Navigate to="/" />} />
-    </Routes>
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
+    </Suspense>
   );
 };
 

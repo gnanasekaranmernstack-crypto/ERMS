@@ -47,23 +47,37 @@ const DataTable = ({ columns, data, pagination, onPageChange, loading }) => {
       </div>
 
       {pagination && (
-        <div className="px-6 py-4 flex items-center justify-between border-t border-gray-100">
-          <p className="text-sm text-text-secondary">
-            Showing Page <span className="font-medium text-text-primary">{pagination.page}</span> of{' '}
-            <span className="font-medium text-text-primary">{pagination.pages}</span>
-          </p>
+        <div className="px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-gray-100">
+          <div className="flex items-center gap-4">
+            <p className="text-sm text-text-secondary">
+              Showing Page <span className="font-medium text-text-primary">{pagination.page}</span> of{' '}
+              <span className="font-medium text-text-primary">{pagination.pages}</span>
+            </p>
+            <div className="flex items-center gap-2 border-l border-gray-200 pl-4">
+              <label className="text-xs font-bold text-text-secondary uppercase">Rows:</label>
+              <select 
+                className="text-sm font-bold bg-transparent border-none focus:ring-0 text-primary cursor-pointer"
+                value={pagination.pageSize || 10}
+                onChange={(e) => onPageChange(1, Number(e.target.value))}
+              >
+                {[5, 10, 25, 50].map(size => (
+                  <option key={size} value={size}>{size}</option>
+                ))}
+              </select>
+            </div>
+          </div>
           <div className="flex gap-2">
             <button
-              onClick={() => onPageChange(pagination.page - 1)}
+              onClick={() => onPageChange(pagination.page - 1, pagination.pageSize)}
               disabled={pagination.page === 1}
-              className="p-2 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="p-2 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
               <HiOutlineChevronLeft className="text-xl" />
             </button>
             <button
-              onClick={() => onPageChange(pagination.page + 1)}
+              onClick={() => onPageChange(pagination.page + 1, pagination.pageSize)}
               disabled={pagination.page === pagination.pages}
-              className="p-2 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="p-2 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
               <HiOutlineChevronRight className="text-xl" />
             </button>

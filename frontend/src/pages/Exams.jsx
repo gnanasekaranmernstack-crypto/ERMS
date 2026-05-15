@@ -16,7 +16,7 @@ const Exams = ({ type }) => {
   const { user } = useAuth();
   const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [pagination, setPagination] = useState({ page: 1, pages: 1 });
+  const [pagination, setPagination] = useState({ page: 1, pages: 1, pageSize: 10 });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingExam, setEditingExam] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -51,12 +51,12 @@ const Exams = ({ type }) => {
     }
   }, [user, editingExam, type]);
 
-  const fetchExams = async (page = 1) => {
+  const fetchExams = async (page = 1, pageSize = pagination.pageSize) => {
     setLoading(true);
     try {
-      const { data } = await API.get(`/exams?pageNumber=${page}&keyword=${searchTerm}&department=${filterDept}&semester=${filterSem}&category=${type || 'Semester'}`);
+      const { data } = await API.get(`/exams?pageNumber=${page}&pageSize=${pageSize}&keyword=${searchTerm}&department=${filterDept}&semester=${filterSem}&category=${type || 'Semester'}`);
       setExams(data.exams);
-      setPagination({ page: data.page, pages: data.pages });
+      setPagination({ page: data.page, pages: data.pages, pageSize: pageSize });
     } catch (error) {
       toast.error('Failed to fetch exams');
     } finally {
@@ -223,7 +223,7 @@ const Exams = ({ type }) => {
         data={exams} 
         loading={loading}
         pagination={pagination}
-        onPageChange={(page) => fetchExams(page)}
+        onPageChange={(page, pageSize) => fetchExams(page, pageSize)}
       />
 
       <Modal 

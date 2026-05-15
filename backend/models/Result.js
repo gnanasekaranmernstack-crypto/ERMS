@@ -37,6 +37,12 @@ const resultSchema = mongoose.Schema(
       required: true,
       enum: ['Pass', 'Fail'],
     },
+    category: {
+      type: String,
+      required: true,
+      enum: ['Semester', 'Arrear'],
+      default: 'Semester'
+    },
   },
   {
     timestamps: true,

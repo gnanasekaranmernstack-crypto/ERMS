@@ -5,7 +5,7 @@ import Result from '../models/Result.js';
 // @route   GET /api/results
 // @access  Private
 const getResults = asyncHandler(async (req, res) => {
-  const pageSize = 10;
+  const pageSize = Number(req.query.pageSize) || 10;
   const page = Number(req.query.pageNumber) || 1;
   const keyword = req.query.keyword
     ? {
@@ -18,9 +18,10 @@ const getResults = asyncHandler(async (req, res) => {
 
   const department = req.query.department ? { department: req.query.department } : {};
   const semester = req.query.semester ? { semester: req.query.semester } : {};
+  const category = req.query.category ? { category: req.query.category } : {};
 
-  const count = await Result.countDocuments({ ...keyword, ...department, ...semester });
-  const results = await Result.find({ ...keyword, ...department, ...semester })
+  const count = await Result.countDocuments({ ...keyword, ...department, ...semester, ...category });
+  const results = await Result.find({ ...keyword, ...department, ...semester, ...category })
     .limit(pageSize)
     .skip(pageSize * (page - 1))
     .sort({ createdAt: -1 });
@@ -56,6 +57,7 @@ const createResult = asyncHandler(async (req, res) => {
     marks,
     grade,
     resultStatus,
+    category,
   } = req.body;
 
   const result = new Result({
@@ -68,6 +70,7 @@ const createResult = asyncHandler(async (req, res) => {
     marks,
     grade,
     resultStatus,
+    category,
   });
 
   const createdResult = await result.save();
@@ -88,6 +91,7 @@ const updateResult = asyncHandler(async (req, res) => {
     marks,
     grade,
     resultStatus,
+    category,
   } = req.body;
 
   const result = await Result.findById(req.params.id);
@@ -102,6 +106,7 @@ const updateResult = asyncHandler(async (req, res) => {
     result.marks = marks || result.marks;
     result.grade = grade || result.grade;
     result.resultStatus = resultStatus || result.resultStatus;
+    result.category = category || result.category;
 
     const updatedResult = await result.save();
     res.json(updatedResult);

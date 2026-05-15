@@ -91,7 +91,7 @@ const Login = () => {
                         type="email"
                         required
                         className="input-field pl-10"
-                        placeholder="admin@gmail.com"
+                        placeholder="your-email@example.com"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                       />
@@ -167,7 +167,7 @@ const Login = () => {
                         type="email"
                         required
                         className="input-field pl-10"
-                        placeholder="admin@gmail.com"
+                        placeholder="your-email@example.com"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                       />
@@ -235,13 +235,6 @@ const Login = () => {
           </AnimatePresence>
         </div>
 
-        {!isResetMode && (
-          <div className="mt-6 p-4 bg-primary/5 rounded-2xl border border-primary/10">
-            <p className="text-[10px] text-center text-primary-dark font-black uppercase tracking-widest">
-              Demo Credentials: admin@gmail.com / admin123
-            </p>
-          </div>
-        )}
       </motion.div>
     </div>
   );

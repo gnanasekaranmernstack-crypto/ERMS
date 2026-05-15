@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import compression from 'compression';
 import { notFound, errorHandler } from './middlewares/errorMiddleware.js';
 
 import authRoutes from './routes/authRoutes.js';
@@ -20,6 +21,7 @@ if (process.env.NODE_ENV === 'development') {
 
 app.use(helmet());
 app.use(cors());
+app.use(compression());
 app.use(express.json());
 
 app.get('/', (req, res) => {

@@ -22,7 +22,9 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: false,
+}));
 app.use(cors());
 app.use(compression());
 app.use(express.json());
@@ -31,12 +33,15 @@ app.use(express.json());
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const distPath = path.resolve(__dirname, '../frontend/dist');
+const uploadsPath = path.resolve(__dirname, './uploads');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/exams', examRoutes);
 app.use('/api/results', resultRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/books', bookRoutes);
+
+app.use('/uploads', express.static(uploadsPath));
 
 if (process.env.NODE_ENV === 'production') {
   // Serve static files from the frontend/dist directory

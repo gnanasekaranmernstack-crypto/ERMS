@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import API from '../api';
 import DataTable from '../components/tables/DataTable';
 import Modal from '../components/modals/Modal';
@@ -13,13 +13,12 @@ import {
   HiOutlineMenu,
   HiOutlineHashtag,
   HiOutlineBookmark,
-  HiOutlineQrcode,
-  HiOutlineX
+  HiOutlineOfficeBuilding,
+  HiOutlinePhotograph,
+  HiOutlineCloudUpload
 } from 'react-icons/hi';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
-import { Html5QrcodeScanner } from 'html5-qrcode';
-import axios from 'axios';
 
 const Books = () => {
   const { user } = useAuth();
@@ -29,13 +28,12 @@ const Books = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBook, setEditingBook] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterDept, setFilterDept] = useState('');
   const [filterSem, setFilterSem] = useState('');
   const [viewMode, setViewMode] = useState('grid');
   
-  // Scanning state
-  const [isScanning, setIsScanning] = useState(false);
-  const scannerRef = useRef(null);
+  // Image state
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
 
   const availableSemesters = user?.entryType === 'Direct Second Year' 
     ? [3, 4, 5, 6, 7, 8] 
@@ -46,6 +44,7 @@ const Books = () => {
     subjectCode: '',
     authors: '',
     regulation: '2021',
+    publication: '',
     description: '',
     semester: availableSemesters[0].toString(),
     department: user?.department || '',
@@ -65,7 +64,7 @@ const Books = () => {
   const fetchBooks = async (page = 1, pageSize = pagination.pageSize) => {
     setLoading(true);
     try {
-      const { data } = await API.get(`/books?pageNumber=${page}&pageSize=${pageSize}&keyword=${searchTerm}&department=${filterDept}&semester=${filterSem}`);
+      const { data } = await API.get(`/books?pageNumber=${page}&pageSize=${pageSize}&keyword=${searchTerm}&semester=${filterSem}`);
       setBooks(data.books);
       setPagination({ page: data.page, pages: data.pages, pageSize: pageSize });
     } catch (error) {
@@ -80,70 +79,18 @@ const Books = () => {
       fetchBooks();
     }, 500);
     return () => clearTimeout(delayDebounce);
-  }, [searchTerm, filterDept, filterSem]);
+  }, [searchTerm, filterSem]);
 
-  // Handle Scanner
-  useEffect(() => {
-    if (isScanning) {
-      const scanner = new Html5QrcodeScanner("reader", { 
-        fps: 10, 
-        qrbox: { width: 250, height: 150 },
-        aspectRatio: 1.0
-      }, false);
-
-      scanner.render(onScanSuccess, onScanFailure);
-      scannerRef.current = scanner;
-
-      return () => {
-        if (scannerRef.current) {
-          scannerRef.current.clear().catch(err => console.error("Failed to clear scanner", err));
-        }
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
       };
+      reader.readAsDataURL(file);
     }
-  }, [isScanning]);
-
-  const onScanSuccess = async (decodedText) => {
-    // decodedText is usually the ISBN
-    setIsScanning(false);
-    toast.loading('Fetching book details...', { id: 'fetch-book' });
-    
-    try {
-      // Try fetching from Google Books API
-      const response = await axios.get(`https://www.googleapis.com/books/v1/volumes?q=isbn:${decodedText}`);
-      
-      if (response.data.totalItems > 0) {
-        const bookInfo = response.data.items[0].volumeInfo;
-        setFormData(prev => ({
-          ...prev,
-          subjectName: bookInfo.title || '',
-          authors: bookInfo.authors ? bookInfo.authors.join(', ') : '',
-          description: bookInfo.description || ''
-        }));
-        toast.success('Book details auto-filled!', { id: 'fetch-book' });
-      } else {
-        // Try searching by title if ISBN lookup fails (some barcodes are not ISBNs)
-        toast.error('ISBN not found. Trying keyword search...', { id: 'fetch-book' });
-        const titleResponse = await axios.get(`https://www.googleapis.com/books/v1/volumes?q=${decodedText}`);
-        if (titleResponse.data.totalItems > 0) {
-          const bookInfo = titleResponse.data.items[0].volumeInfo;
-          setFormData(prev => ({
-            ...prev,
-            subjectName: bookInfo.title || '',
-            authors: bookInfo.authors ? bookInfo.authors.join(', ') : '',
-            description: bookInfo.description || ''
-          }));
-          toast.success('Book details auto-filled!', { id: 'fetch-book' });
-        } else {
-          toast.error('Could not find book details. Please enter manually.', { id: 'fetch-book' });
-        }
-      }
-    } catch (error) {
-      toast.error('Failed to fetch book info. Please enter manually.', { id: 'fetch-book' });
-    }
-  };
-
-  const onScanFailure = (error) => {
-    // console.warn(`Code scan error = ${error}`);
   };
 
   const handleOpenModal = (book = null) => {
@@ -153,6 +100,7 @@ const Books = () => {
         ...book,
         semester: book.semester.toString()
       });
+      setImagePreview(book.image ? `${API.defaults.baseURL.replace('/api', '')}${book.image}` : null);
     } else {
       setEditingBook(null);
       setFormData({
@@ -160,24 +108,42 @@ const Books = () => {
         subjectCode: '',
         authors: '',
         regulation: '2021',
+        publication: '',
         description: '',
         semester: availableSemesters[0].toString(),
         department: user?.department || '',
         link: ''
       });
+      setImagePreview(null);
     }
-    setIsScanning(false);
+    setImageFile(null);
     setIsModalOpen(true);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const data = new FormData();
+    
+    // Append all form fields
+    Object.keys(formData).forEach(key => {
+      data.append(key, formData[key]);
+    });
+    
+    // Append image if selected
+    if (imageFile) {
+      data.append('image', imageFile);
+    }
+
     try {
       if (editingBook) {
-        await API.put(`/books/${editingBook._id}`, formData);
+        await API.put(`/books/${editingBook._id}`, data, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
         toast.success('Book details updated');
       } else {
-        await API.post('/books', formData);
+        await API.post('/books', data, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
         toast.success('New book added to library');
       }
       setIsModalOpen(false);
@@ -200,18 +166,29 @@ const Books = () => {
   };
 
   const columns = [
+    { header: 'Image', render: (row) => (
+      <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
+        {row.image ? (
+          <img 
+            src={`${API.defaults.baseURL.replace('/api', '')}${row.image}`} 
+            alt={row.subjectName} 
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-gray-400">
+            <HiOutlinePhotograph size={20} />
+          </div>
+        )}
+      </div>
+    )},
     { header: 'Subject Info', render: (row) => (
-      <div className="flex items-center gap-3">
-        <div className="p-2 bg-primary/10 rounded-lg text-primary text-xl">
-          <HiOutlineBookOpen />
-        </div>
-        <div>
-          <p className="font-bold">{row.subjectName}</p>
-          <p className="text-xs text-text-secondary">{row.subjectCode} • R-{row.regulation}</p>
-        </div>
+      <div>
+        <p className="font-bold">{row.subjectName}</p>
+        <p className="text-xs text-text-secondary">{row.subjectCode} • R-{row.regulation}</p>
       </div>
     )},
     { header: 'Authors', accessor: 'authors' },
+    { header: 'Publication', accessor: 'publication' },
     { header: 'Dept/Sem', render: (row) => (
       <div className="text-sm">
         <p className="font-bold">{row.department}</p>
@@ -258,19 +235,12 @@ const Books = () => {
           <HiOutlineSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary text-xl" />
           <input
             type="text"
-            placeholder="Search by subject, code or authors..."
+            placeholder="Search by subject, code, authors or publication..."
             className="input-field pl-10"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <select className="input-field w-auto min-w-[150px]" value={filterDept} onChange={(e) => setFilterDept(e.target.value)}>
-          <option value="">All Departments</option>
-          <option value="CS">Computer Science</option>
-          <option value="IT">Information Technology</option>
-          <option value="ECE">Electronics</option>
-          <option value="MECH">Mechanical</option>
-        </select>
         <select className="input-field w-auto min-w-[150px]" value={filterSem} onChange={(e) => setFilterSem(e.target.value)}>
           <option value="">All Semesters</option>
           {availableSemesters.map(s => <option key={s} value={s}>Semester {s}</option>)}
@@ -285,8 +255,16 @@ const Books = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {books.length > 0 ? books.map((book) => (
             <div key={book._id} className="card hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col group">
-              <div className="h-40 bg-gradient-to-br from-primary/5 to-primary/20 rounded-t-xl flex items-center justify-center relative overflow-hidden">
-                <HiOutlineBookOpen className="text-6xl text-primary/30 group-hover:scale-110 transition-transform duration-500" />
+              <div className="h-48 bg-gray-100 rounded-t-xl relative overflow-hidden flex items-center justify-center">
+                {book.image ? (
+                  <img 
+                    src={`${API.defaults.baseURL.replace('/api', '')}${book.image}`} 
+                    alt={book.subjectName} 
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
+                ) : (
+                  <HiOutlineBookOpen className="text-7xl text-primary/20" />
+                )}
                 <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button onClick={() => handleOpenModal(book)} className="p-1.5 bg-white text-primary rounded-lg shadow-md hover:bg-primary hover:text-white transition-colors">
                     <HiOutlinePencil size={14} />
@@ -310,7 +288,10 @@ const Books = () => {
                 <div className="flex-1">
                   <h3 className="font-bold text-text-primary line-clamp-1 mb-1">{book.subjectName}</h3>
                   <p className="text-xs text-primary font-bold mb-3">{book.subjectCode}</p>
-                  <p className="text-xs text-text-secondary mb-3 italic leading-tight">Authors: {book.authors}</p>
+                  <div className="space-y-1 mb-4">
+                    <p className="text-[10px] text-text-secondary italic leading-tight line-clamp-1">Authors: {book.authors}</p>
+                    <p className="text-[10px] text-primary font-bold uppercase tracking-tight">Pub: {book.publication}</p>
+                  </div>
                   <div className="flex flex-wrap gap-2 mb-4">
                     <span className="px-2 py-0.5 bg-indigo-50 text-indigo-600 text-[10px] font-bold rounded">
                       {book.department}
@@ -336,31 +317,44 @@ const Books = () => {
       )}
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingBook ? 'Edit Book Details' : 'Add New Book'}>
-        <div className="mb-6">
-          {!isScanning ? (
-            <button 
-              type="button"
-              onClick={() => setIsScanning(true)}
-              className="w-full py-3 border-2 border-dashed border-primary/30 rounded-xl flex items-center justify-center gap-3 text-primary hover:bg-primary/5 transition-all font-bold"
-            >
-              <HiOutlineQrcode className="text-2xl" />
-              Scan Book Barcode (ISBN)
-            </button>
-          ) : (
-            <div className="relative">
-              <div id="reader" className="w-full overflow-hidden rounded-xl border-2 border-primary shadow-lg"></div>
-              <button 
-                onClick={() => setIsScanning(false)}
-                className="absolute -top-3 -right-3 p-2 bg-red-500 text-white rounded-full shadow-lg hover:bg-red-600 z-10"
-              >
-                <HiOutlineX />
-              </button>
-              <p className="text-center text-xs text-text-secondary mt-2">Center the barcode within the box to scan</p>
-            </div>
-          )}
-        </div>
-
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium mb-2 text-text-secondary">Book Cover Image</label>
+            <div className="flex flex-col items-center gap-4 p-4 border-2 border-dashed border-gray-200 rounded-xl hover:border-primary/50 transition-colors">
+              {imagePreview ? (
+                <div className="relative w-full h-40 rounded-lg overflow-hidden border border-gray-100 shadow-sm">
+                  <img src={imagePreview} alt="Preview" className="w-full h-full object-contain bg-gray-50" />
+                  <button 
+                    type="button"
+                    onClick={() => { setImageFile(null); setImagePreview(null); }}
+                    className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 shadow-md"
+                  >
+                    <HiOutlineTrash size={14} />
+                  </button>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-4 text-gray-400">
+                  <HiOutlineCloudUpload size={40} className="mb-2" />
+                  <p className="text-sm font-medium">Click to upload book cover</p>
+                  <p className="text-[10px]">JPG, JPEG or PNG (Max 2MB)</p>
+                </div>
+              )}
+              <input 
+                type="file" 
+                accept="image/*"
+                onChange={handleImageChange}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                style={{ display: imagePreview ? 'none' : 'block' }}
+              />
+              {imagePreview && (
+                <label className="btn-primary py-2 px-4 text-xs cursor-pointer inline-block">
+                  Change Image
+                  <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+                </label>
+              )}
+            </div>
+          </div>
+
           <div className="md:col-span-2">
             <label className="block text-sm font-medium mb-1">Subject Name *</label>
             <div className="relative">
@@ -386,6 +380,13 @@ const Books = () => {
           <div className="md:col-span-2">
             <label className="block text-sm font-medium mb-1">Authors *</label>
             <input type="text" required className="input-field" placeholder="e.g. Abraham Silberschatz, Peter B. Galvin" value={formData.authors} onChange={(e) => setFormData({...formData, authors: e.target.value})} />
+          </div>
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium mb-1">Publication / Publisher *</label>
+            <div className="relative">
+              <HiOutlineOfficeBuilding className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input type="text" required className="input-field pl-10" placeholder="e.g. Tata McGraw-Hill, Pearson" value={formData.publication} onChange={(e) => setFormData({...formData, publication: e.target.value})} />
+            </div>
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Department *</label>

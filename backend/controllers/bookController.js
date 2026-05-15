@@ -1,5 +1,7 @@
 import asyncHandler from 'express-async-handler';
 import Book from '../models/Book.js';
+import path from 'path';
+import fs from 'fs';
 
 // @desc    Get all books
 const getBooks = asyncHandler(async (req, res) => {
@@ -12,12 +14,9 @@ const getBooks = asyncHandler(async (req, res) => {
     query.$or = [
       { subjectName: { $regex: req.query.keyword, $options: 'i' } },
       { subjectCode: { $regex: req.query.keyword, $options: 'i' } },
-      { authors: { $regex: req.query.keyword, $options: 'i' } }
+      { authors: { $regex: req.query.keyword, $options: 'i' } },
+      { publication: { $regex: req.query.keyword, $options: 'i' } }
     ];
-  }
-
-  if (req.query.department) {
-    query.department = req.query.department;
   }
 
   if (req.query.semester) {
@@ -52,17 +51,22 @@ const createBook = asyncHandler(async (req, res) => {
     subjectCode,
     authors,
     regulation,
+    publication,
     description,
     semester,
     department,
     link
   } = req.body;
 
+  const image = req.file ? `/uploads/${req.file.filename}` : '';
+
   const book = new Book({
     subjectName,
     subjectCode,
     authors,
     regulation,
+    publication,
+    image,
     description,
     semester: Number(semester),
     department,
@@ -81,6 +85,7 @@ const updateBook = asyncHandler(async (req, res) => {
     subjectCode,
     authors,
     regulation,
+    publication,
     description,
     semester,
     department,
@@ -94,10 +99,22 @@ const updateBook = asyncHandler(async (req, res) => {
     book.subjectCode = subjectCode || book.subjectCode;
     book.authors = authors || book.authors;
     book.regulation = regulation || book.regulation;
+    book.publication = publication || book.publication;
     book.description = description || book.description;
     book.semester = semester ? Number(semester) : book.semester;
     book.department = department || book.department;
     book.link = link || book.link;
+
+    if (req.file) {
+      // Delete old image if it exists
+      if (book.image) {
+        const oldImagePath = path.join(path.resolve(), book.image);
+        if (fs.existsSync(oldImagePath)) {
+          fs.unlinkSync(oldImagePath);
+        }
+      }
+      book.image = `/uploads/${req.file.filename}`;
+    }
 
     const updatedBook = await book.save();
     res.json(updatedBook);
@@ -111,6 +128,12 @@ const updateBook = asyncHandler(async (req, res) => {
 const deleteBook = asyncHandler(async (req, res) => {
   const book = await Book.findById(req.params.id);
   if (book) {
+    if (book.image) {
+      const imagePath = path.join(path.resolve(), book.image);
+      if (fs.existsSync(imagePath)) {
+        fs.unlinkSync(imagePath);
+      }
+    }
     await book.deleteOne();
     res.json({ message: 'Book removed' });
   } else {

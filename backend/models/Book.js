@@ -17,6 +17,13 @@ const bookSchema = mongoose.Schema({
     type: String,
     required: true,
   },
+  publication: {
+    type: String,
+    required: true,
+  },
+  image: {
+    type: String,
+  },
   description: {
     type: String,
   },

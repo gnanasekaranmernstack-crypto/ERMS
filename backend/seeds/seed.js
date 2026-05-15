@@ -17,7 +17,7 @@ const seedData = async () => {
 
     const adminUser = await User.create({
       name: 'Admin User',
-      email: process.env.SEED_ADMIN_EMAIL || 'admin@gmail.com',
+      email: (process.env.SEED_ADMIN_EMAIL || 'admin@gmail.com').toLowerCase().trim(),
       password: process.env.SEED_ADMIN_PASSWORD || 'admin123',
       role: 'admin',
       department: 'Computer Science',

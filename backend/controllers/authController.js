@@ -5,7 +5,10 @@ import generateToken from '../utils/generateToken.js';
 // @desc    Auth user & get token
 const authUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
-  const user = await User.findOne({ email });
+  const normalizedEmail = email.toLowerCase().trim();
+  
+  console.log(`Login attempt for: ${normalizedEmail}`);
+  const user = await User.findOne({ email: normalizedEmail });
 
   if (user && (await user.matchPassword(password))) {
     res.json({

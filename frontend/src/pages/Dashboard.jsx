@@ -126,8 +126,8 @@ const Dashboard = () => {
         {/* Dept Pie Chart */}
         <div className="card">
           <h3 className="text-lg font-bold text-text-primary mb-6">Exams by Department</h3>
-          <div className="h-64 w-full overflow-hidden">
-            <ResponsiveContainer width="100%" height="100%" debounce={100}>
+          <div className="h-64 w-full min-w-0">
+            <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
               <PieChart>
                 <Pie
                   data={data?.charts.departmentExams}
@@ -162,8 +162,8 @@ const Dashboard = () => {
         {/* Exams per Month Bar Chart */}
         <div className="card">
           <h3 className="text-lg font-bold text-text-primary mb-6">Exams per Month</h3>
-          <div className="h-80 w-full overflow-hidden">
-            <ResponsiveContainer width="100%" height="100%" debounce={100}>
+          <div className="h-80 w-full min-w-0">
+            <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
               <BarChart data={data?.charts.examsPerMonth}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
                 <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#64748B' }} />
@@ -181,8 +181,8 @@ const Dashboard = () => {
         {/* Upcoming Trend Line Chart */}
         <div className="card">
           <h3 className="text-lg font-bold text-text-primary mb-6">Exams Trend</h3>
-          <div className="h-80 w-full overflow-hidden">
-            <ResponsiveContainer width="100%" height="100%" debounce={100}>
+          <div className="h-80 w-full min-w-0">
+            <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
               <LineChart data={data?.charts.upcomingTrend}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
                 <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fill: '#64748B' }} />

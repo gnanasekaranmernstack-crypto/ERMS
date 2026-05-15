@@ -1,11 +1,21 @@
 import React from 'react';
 import { HiOutlineMenuAlt2, HiOutlineLogout } from 'react-icons/hi';
 import { useAuth } from '../../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const Navbar = ({ toggleSidebar }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const getPageTitle = () => {
+    const path = location.pathname;
+    if (path === '/') return 'Dashboard';
+    if (path.includes('/exams')) return 'Exams';
+    if (path.includes('/results')) return 'Results';
+    if (path.includes('/profile')) return 'My Profile';
+    return 'ERMS';
+  };
 
   const handleLogout = () => {
     logout();
@@ -18,7 +28,7 @@ const Navbar = ({ toggleSidebar }) => {
         <button onClick={toggleSidebar} className="lg:hidden text-2xl text-text-secondary hover:text-primary transition-colors">
           <HiOutlineMenuAlt2 />
         </button>
-        <h2 className="text-xl font-bold text-text-primary hidden md:block tracking-tight">Dashboard</h2>
+        <h2 className="text-xl font-bold text-text-primary hidden md:block tracking-tight">{getPageTitle()}</h2>
       </div>
       
       <div className="flex items-center gap-4">

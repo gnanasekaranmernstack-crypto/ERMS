@@ -85,14 +85,6 @@ const Sidebar = ({ isOpen, toggleSidebar, isCollapsed, toggleCollapse }) => {
       )}
 
       <aside 
-        onMouseEnter={() => {
-          if (window.innerWidth >= 1024) {
-            document.body.style.overflow = 'hidden';
-          }
-        }}
-        onMouseLeave={() => {
-          document.body.style.overflow = 'auto';
-        }}
         className={`fixed top-0 left-0 h-full bg-primary z-50 transition-all duration-300 transform 
         ${isOpen ? 'translate-x-0' : '-translate-x-full'} 
         lg:translate-x-0 flex flex-col

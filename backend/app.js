@@ -1,4 +1,5 @@
 import express from 'express';
+import path from 'path';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -24,14 +25,26 @@ app.use(cors());
 app.use(compression());
 app.use(express.json());
 
-app.get('/', (req, res) => {
-  res.send('API is running...');
-});
+const __dirname = path.resolve();
+
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '/frontend/dist')));
+} else {
+  app.get('/', (req, res) => {
+    res.send('API is running...');
+  });
+}
 
 app.use('/api/auth', authRoutes);
 app.use('/api/exams', examRoutes);
 app.use('/api/results', resultRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+
+if (process.env.NODE_ENV === 'production') {
+  app.get('*', (req, res) =>
+    res.sendFile(path.resolve(__dirname, 'frontend', 'dist', 'index.html'))
+  );
+}
 
 app.use(notFound);
 app.use(errorHandler);

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import API from '../api';
 import toast from 'react-hot-toast';
+import logo from '../assets/logo.png';
 import { HiOutlineMail, HiOutlineLockClosed, HiOutlineEye, HiOutlineEyeOff, HiOutlineArrowLeft } from 'react-icons/hi';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -64,7 +65,7 @@ const Login = () => {
         className="w-full max-w-md"
       >
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-black text-primary mb-2 tracking-tight">ERMS</h1>
+          <img src={logo} alt="ERMS Logo" className="h-24 mx-auto mb-4" />
           <p className="text-text-secondary font-medium text-sm">
             {isResetMode ? 'Reset your account password' : 'Exams & Results Management Systems'}
           </p>

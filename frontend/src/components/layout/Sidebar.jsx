@@ -11,8 +11,10 @@ import {
   HiChevronDown,
   HiChevronRight
 } from 'react-icons/hi';
+import { MdCopyright } from 'react-icons/md';
 import { useAuth } from '../../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import logo from '../../assets/logo.png';
 
 const Sidebar = ({ isOpen, toggleSidebar, isCollapsed, toggleCollapse }) => {
   const { logout, user } = useAuth();
@@ -98,10 +100,15 @@ const Sidebar = ({ isOpen, toggleSidebar, isCollapsed, toggleCollapse }) => {
       >
         <div className={`p-6 flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
           {!isCollapsed && (
-            <div>
-              <h1 className="text-white text-2xl font-black tracking-tight leading-none">ERMS</h1>
-              <p className="text-indigo-200 text-[10px] uppercase font-bold tracking-widest mt-1 whitespace-nowrap">Admin System</p>
+            <div className="flex items-center gap-3">
+              <img src={logo} alt="Logo" className="h-10 w-10 object-contain" />
+              <div>
+                <h1 className="text-white text-lg font-black tracking-tight leading-none">ERMS</h1>
+              </div>
             </div>
+          )}
+          {isCollapsed && (
+            <img src={logo} alt="Logo" className="h-8 w-8 object-contain" />
           )}
           
           <button 
@@ -218,6 +225,18 @@ const Sidebar = ({ isOpen, toggleSidebar, isCollapsed, toggleCollapse }) => {
             <HiOutlineLogout className="text-xl flex-shrink-0" />
             {!isCollapsed && <span className="whitespace-nowrap">Logout</span>}
           </button>
+
+          {!isCollapsed && (
+            <div className="flex items-center justify-center gap-1.5 pt-4 text-[10px] text-indigo-100 font-bold uppercase tracking-wider">
+              <MdCopyright className="text-sm" />
+              <span>All rights reserved Gnanastack Technologies 2026</span>
+            </div>
+          )}
+          {isCollapsed && (
+            <div className="flex justify-center pt-4 text-indigo-100" title="All rights reserved Gnanastack Technologies 2026">
+              <MdCopyright className="text-sm" />
+            </div>
+          )}
         </div>
       </aside>
     </>

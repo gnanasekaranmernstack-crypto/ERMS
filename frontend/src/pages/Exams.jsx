@@ -155,13 +155,18 @@ const Exams = ({ type }) => {
         <p className="text-xs text-text-secondary">Semester {row.semester}</p>
       </div>
     )},
-    { header: 'Status', render: (row) => (
-      <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-        row.status === 'Upcoming' ? 'bg-amber-100 text-amber-600' : 'bg-emerald-100 text-emerald-600'
-      }`}>
-        {row.status}
-      </span>
-    )},
+    { header: 'Status', render: (row) => {
+      let statusClasses = 'bg-red-100 text-red-600'; // Default for Completed/Others
+      if (row.status === 'Upcoming') {
+        statusClasses = 'bg-emerald-100 text-emerald-600';
+      }
+      
+      return (
+        <span className={`px-3 py-1 rounded-full text-xs font-bold ${statusClasses}`}>
+          {row.status}
+        </span>
+      );
+    }},
     { header: 'Actions', render: (row) => (
       <div className="flex gap-2">
         <button onClick={() => handleOpenModal(row)} className="p-2 text-primary hover:bg-primary/10 rounded-lg transition-colors">
